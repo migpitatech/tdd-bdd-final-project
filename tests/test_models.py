@@ -104,3 +104,60 @@ class TestProductModel(unittest.TestCase):
     #
     # ADD YOUR TEST CASES HERE
     #
+
+    def test_read_a_product(self):
+        """It should read a product"""
+        product = ProductFactory()
+        product.id = None
+        product.create()
+        # Assert that it was assigned an id and shows up in the database
+        self.assertIsNotNone(product.id)
+        # Fetch the product back from the database
+        found_product = Product.find(product.id)
+        self.assertEqual(found_product.id, product.id)
+        self.assertEqual(found_product.name, product.name)
+        self.assertEqual(found_product.description, product.description)
+        self.assertEqual(Decimal(found_product.price), product.price)
+    
+    def test_update_a_product(self):
+        """It should update a product"""
+        product = ProductFactory()
+        product.id = None
+        product.create()
+        # Assert that it was assigned an id and shows up in the database
+        self.assertIsNotNone(product.id)
+        # Update the product
+        product.description = "purpose"
+        original_id = product.id
+        product.update()
+        self.assertEqual(original_id, product.id)
+        self.assertEqual("purpose", product.description)
+        # Fetch all product back from the system
+        products = Product.all()
+        self.assertEqual(len(products), 1)
+        # Check that it matches the original product
+        original_product = products[0]
+        self.assertEqual(original_product.id, original_id)
+        self.assertEqual(original_product.description, "purpose")
+    
+    def test_delete_a_product(self):
+        """It should delete a product"""
+        product = ProductFactory()
+        product.create()
+        products = Product.all()
+        self.assertEqual(len(products), 1)
+        # Delete the existing product
+        product.delete()
+        self.assertEqual(len(products), 0)
+    
+    def test_list_all_products(self):
+        """It should list all products"""
+        products = Product.all()
+        self.assertEqual(len(products), 0)
+        # Create a list of five products
+        for _ in range(5):
+            product = ProductFactory()
+            product.create()
+        # Check if we have five products
+        products = Product.all()
+        self.assertEqual(len(products), 5)
