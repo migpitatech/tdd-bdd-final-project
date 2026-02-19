@@ -161,3 +161,29 @@ class TestProductModel(unittest.TestCase):
         # Check if we have five products
         products = Product.all()
         self.assertEqual(len(products), 5)
+
+    def test_find_a_product_by_availability(self):
+        """It should find a product by availability"""
+        products = ProductFactory.create_batch(10)
+        for product in products:
+            product.create()
+        available_product = products[0].available
+        count = len([product for product in products
+            if product.available == available_product])
+        retrieved_products = Product.find_by_availability(available_product)
+        self.assertEqual(retrieved_products.count(), count)
+        for product in retrieved_products:
+            self.assertEqual(available_product, product.available)
+    
+    def test_find_a_product_by_category(self):
+        """It should find a product by category"""
+        products = ProductFactory.create_batch(10)
+        for product in products:
+            product.create()
+        category_product = products[0].category
+        count = len([product for product in products
+            if product.category == category_product])
+        retrieved_products = Product.find_by_category(category_product)
+        self.assertEqual(retrieved_products.count(), count)
+        for product in retrieved_products:
+            self.assertEqual(category_product, product.category)
