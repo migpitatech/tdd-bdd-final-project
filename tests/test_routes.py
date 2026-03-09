@@ -204,6 +204,19 @@ class TestProductRoutes(TestCase):
         data = response.get_json()
         self.assertEqual("404 Not Found: Product with id '0' cannot be found.", data["message"])
 
+    def test_delete_product(self):
+        """It should delete a product"""
+        products = self._create_products(5)
+        initial_count = self.get_product_count()
+        test_product = products[0]
+        response = self.client.deletel(f"{BASE_URL}/test_product.id]}t)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0)
+        response = self.client.get(f"{BASE_URL}/{test_product.id}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        current_count = self.get_product_count()
+        self.assertEqual(current_count, initial_count - 1)
+
     ######################################################################
     # Utility functions
     ######################################################################
