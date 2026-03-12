@@ -97,10 +97,35 @@ def create_products():
 ######################################################################
 # L I S T   A L L   P R O D U C T S
 ######################################################################
+@app.route("/products", methods=["GET"])
+def list_products():
+    """Returns a list of Products"""
+    app.logger.info("Request to list Products...")
 
-#
-# PLACE YOUR CODE TO LIST ALL PRODUCTS HERE
-#
+    products = []
+    name = request.args.get("name")
+    category = request.args.get("category")
+    available = request.args.get("available")
+
+    if name:
+        app.logger.info("Find products list by name: %s", name)
+        products = Product.find_by_name(name)
+    elif category:
+        app.logger.info("Find products list by category: %s", category)
+        category_value = getattr(Category, category.upper())
+        products = Product.find_by_category(category_value)
+    elif available:
+        app.logger.info("Find products list by availability: %s", available)
+        available_value = available.lower() in ["true", "yes", "1"]
+        products = Product.find_by_availability(available_value)
+    else:
+        app.logger.info("Find all the products")
+        products = Product.all()
+
+    products_list = [product.serialize() for product in products]
+    app.logger.info("Number of products [%s]", len(products_list))
+
+    return products_list, status.HTTP_200_OK
 
 ######################################################################
 # R E A D   A   P R O D U C T
