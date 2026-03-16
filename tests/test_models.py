@@ -27,7 +27,7 @@ import os
 import logging
 import unittest
 from decimal import Decimal
-from service.models import Product, Category, db
+from service.models import Product, Category, DataValidationError, db
 from service import app
 from tests.factories import ProductFactory
 
@@ -101,10 +101,6 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(new_product.available, product.available)
         self.assertEqual(new_product.category, product.category)
 
-    #
-    # ADD YOUR TEST CASES HERE
-    #
-
     def test_read_a_product(self):
         """It should read a product"""
         product = ProductFactory()
@@ -140,15 +136,27 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(original_product.id, original_id)
         self.assertEqual(original_product.description, "purpose")
 
+    def test_update_a_product_with_empty_id(self):
+        """It should update a product with empty id"""
+        product = ProductFactory()
+        product.id = None
+        product.create()
+        # Assert that it was assigned an id and shows up in the database
+        self.assertIsNotNone(product.id)
+        # Update the product
+        product.id = ""
+        product.description = "purpose"
+        original_id = product.id
+        self.assertRaises(DataValidationError, lambda: product.update())
+
     def test_delete_a_product(self):
         """It should delete a product"""
         product = ProductFactory()
         product.create()
-        products = Product.all()
-        self.assertEqual(len(products), 1)
+        self.assertEqual(len(Product.all()), 1)
         # Delete the existing product
         product.delete()
-        self.assertEqual(len(products), 0)
+        self.assertEqual(len(Product.all()), 0)
 
     def test_list_all_products(self):
         """It should list all products"""
