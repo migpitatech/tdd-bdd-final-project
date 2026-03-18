@@ -82,6 +82,35 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(product.price, 12.50)
         self.assertEqual(product.category, Category.CLOTHS)
 
+    def test_deserialize_with_invalid_available(self):
+        """It should deserialize a product with invalid available"""
+        data = {
+        "name": "Fedora",
+        "description": "A red hat",
+        "price": "12.50",
+        "available": "no",
+        "category": "CLOTHS"
+        }
+        product = Product(name="Fedora", description="A red hat", price=12.50, available="no", category=Category.CLOTHS)
+        self.assertRaises(DataValidationError, lambda: product.deserialize(data))
+
+    def test_deserialize_with_invalid_category(self):
+        """It should deserialize a product with invalid category"""
+        data = {
+        "name": "Fedora",
+        "description": "A red hat",
+        "price": "12.50",
+        "available": True,
+        "category": "INVALID"
+        }
+        product = Product(name="Fedora", description="A red hat", price=12.50, available=True, category=Category.CLOTHS)
+        self.assertRaises(DataValidationError, lambda: product.deserialize(data))
+
+    def test_deserialize_with_no_data(self):
+        """It should deserialize a product with no data"""
+        product = Product(name="Fedora", description="A red hat", price=12.50, available=True, category=Category.CLOTHS)
+        self.assertRaises(DataValidationError, lambda: product.deserialize(None))
+
     def test_add_a_product(self):
         """It should Create a product and add it to the database"""
         products = Product.all()
@@ -193,3 +222,15 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(retrieved_products.count(), count)
         for product in retrieved_products:
             self.assertEqual(category_product, product.category)
+    
+    def test_find_a_product_by_price(self):
+        """It should find a product by price"""
+        products = ProductFactory.create_batch(10)
+        for product in products:
+            product.create()
+        price_product = products[0].price
+        count = len([product for product in products if product.price == price_product])
+        retrieved_products = Product.find_by_price(price_product)
+        self.assertEqual(retrieved_products.count(), count)
+        for product in retrieved_products:
+            self.assertEqual(price_product, product.price)
