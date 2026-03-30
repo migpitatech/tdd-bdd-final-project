@@ -85,11 +85,11 @@ class TestProductModel(unittest.TestCase):
     def test_deserialize_with_invalid_available(self):
         """It should deserialize a product with invalid available"""
         data = {
-        "name": "Fedora",
-        "description": "A red hat",
-        "price": "12.50",
-        "available": "no",
-        "category": "CLOTHS"
+            "name": "Fedora",
+            "description": "A red hat",
+            "price": "12.50",
+            "available": "no",
+            "category": "CLOTHS"
         }
         product = Product(name="Fedora", description="A red hat", price=12.50, available="no", category=Category.CLOTHS)
         self.assertRaises(DataValidationError, lambda: product.deserialize(data))
@@ -97,11 +97,11 @@ class TestProductModel(unittest.TestCase):
     def test_deserialize_with_invalid_category(self):
         """It should deserialize a product with invalid category"""
         data = {
-        "name": "Fedora",
-        "description": "A red hat",
-        "price": "12.50",
-        "available": True,
-        "category": "INVALID"
+            "name": "Fedora",
+            "description": "A red hat",
+            "price": "12.50",
+            "available": True,
+            "category": "INVALID"
         }
         product = Product(name="Fedora", description="A red hat", price=12.50, available=True, category=Category.CLOTHS)
         self.assertRaises(DataValidationError, lambda: product.deserialize(data))
@@ -175,8 +175,8 @@ class TestProductModel(unittest.TestCase):
         # Update the product
         product.id = ""
         product.description = "purpose"
-        original_id = product.id
-        self.assertRaises(DataValidationError, lambda: product.update())
+        with self.assertRaises(DataValidationError):
+            product.update()
 
     def test_delete_a_product(self):
         """It should delete a product"""
@@ -222,7 +222,7 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(retrieved_products.count(), count)
         for product in retrieved_products:
             self.assertEqual(category_product, product.category)
-    
+
     def test_find_a_product_by_price(self):
         """It should find a product by price"""
         products = ProductFactory.create_batch(10)
@@ -234,3 +234,10 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(retrieved_products.count(), count)
         for product in retrieved_products:
             self.assertEqual(price_product, product.price)
+
+    def test_find_a_product_by_price_string(self):
+        """It should find a product by price, which is a string"""
+        price_product = ' "12.50" '
+        Product.find_by_price(price_product)
+        price_value = Decimal(price_product.strip(' "'))
+        self.assertEqual(price_value, Decimal("12.50"))

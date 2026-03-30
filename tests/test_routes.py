@@ -160,6 +160,13 @@ class TestProductRoutes(TestCase):
         response = self.client.post(BASE_URL, data={}, content_type="plain/text")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
+    def test_create_product_with_wrong_method(self):
+        """It should not Create a Product calling the wrong method"""
+        product = self._create_products()[0]
+        new_product = product.serialize()
+        response = self.client.put(BASE_URL, json=new_product)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
     def test_get_product(self):
         """It should get a product"""
         test_product = self._create_products(1)[0]
